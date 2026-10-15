@@ -29,9 +29,11 @@ jobs:
         run: flutter analyze --fatal-infos
 
       - name: 夹具与 Python 参考实现保持同步
-        # 重算金向量；只要 test/gold_vectors.dart 有任何一个字节漂移就失败。
+        # 重新生成金向量并按仓库格式化规则排版；
+        # 只要 test/gold_vectors.dart 有任何一个字节漂移就失败。
         run: |
           python3 tools/gen_vectors.py
+          dart format test/gold_vectors.dart
           git diff --exit-code test/gold_vectors.dart
 
       - name: 测试

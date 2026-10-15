@@ -200,7 +200,8 @@ def main():
         'const int goldSeed = 0x6BE9;',
         '',
         '/// 报告 §6.1 的开灯帧（§3.3 / §4.1 也单独列了一遍）。',
-        "const String lampOnFrameHex = '0201021b16f0083080ca68c56d1cad52615d1b02ce5b9c5e1129cfe96b3ce6';",
+        "const String lampOnFrameHex =",
+        "    '0201021b16f0083080ca68c56d1cad52615d1b02ce5b9c5e1129cfe96b3ce6';",
         '',
         'final List<GoldVector> goldVectors = <GoldVector>[',
     ]

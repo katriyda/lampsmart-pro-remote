@@ -1,6 +1,7 @@
 package dev.katriyda.lampsmart
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
@@ -94,6 +95,8 @@ class AdvertiserPlugin(private val activity: Activity) {
 
     // --------------------------------------------------------------- 广播
 
+    // 权限在 hasPermission() 里检查过了，lint 看不出来。
+    @SuppressLint("MissingPermission")
     private fun advertise(call: MethodCall, result: MethodChannel.Result) {
         val uuids = call.argument<List<String>>("uuids")
         if (uuids == null || uuids.size != MAX_UUIDS) {
