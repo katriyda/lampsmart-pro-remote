@@ -1,0 +1,11 @@
+# 自行签名 release APK 时，把本文件复制成 android/key.properties 并填入自己的值。
+#
+# 默认情况下 android/app/build.gradle.kts 用 debug key 签名 release 包（方便自用），
+# 只有在 build.gradle.kts 里显式读取下面这些字段时，本文件才会生效。
+# android/key.properties 与 *.jks / *.keystore 都在 .gitignore 里，不会入库。
+#
+# storeFile 用绝对路径或相对于 android/app/ 的路径。
+# storePassword=你的密钥库口令
+# keyPassword=你的密钥口令
+# keyAlias=你的别名
+# storeFile=/absolute/path/to/your/upload-keystore.jks

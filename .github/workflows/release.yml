@@ -1,0 +1,41 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+jobs:
+  release:
+    name: 构建 release APK 并发 Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.47.7'
+          channel: stable
+          cache: true
+
+      - name: 依赖
+        run: flutter pub get
+
+      - name: 测试（发版前必须全绿）
+        run: flutter test
+
+      - name: 构建 release APK
+        run: flutter build apk --release
+
+      - name: 重命名产物
+        run: |
+          cp build/app/outputs/flutter-apk/app-release.apk \
+             "lampsmart-${{ github.ref_name }}-release.apk"
+
+      - name: 发 Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: lampsmart-${{ github.ref_name }}-release.apk
+          generate_release_notes: true

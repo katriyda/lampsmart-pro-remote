@@ -1,0 +1,47 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: 格式化 / 静态检查 / 测试 / 打 debug APK
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.47.7'
+          channel: stable
+          cache: true
+
+      - name: 依赖
+        run: flutter pub get
+
+      - name: 格式化检查
+        run: dart format --set-exit-if-changed .
+
+      - name: 静态检查
+        run: flutter analyze --fatal-infos
+
+      - name: 夹具与 Python 参考实现保持同步
+        # 重算金向量；只要 test/gold_vectors.dart 有任何一个字节漂移就失败。
+        run: |
+          python3 tools/gen_vectors.py
+          git diff --exit-code test/gold_vectors.dart
+
+      - name: 测试
+        run: flutter test
+
+      - name: 构建 debug APK
+        run: flutter build apk --debug
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: app-debug-apk
+          path: build/app/outputs/flutter-apk/app-debug.apk
+          if-no-files-found: error
