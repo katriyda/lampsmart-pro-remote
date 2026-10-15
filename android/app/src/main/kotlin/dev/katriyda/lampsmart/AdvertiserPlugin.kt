@@ -36,6 +36,9 @@ class AdvertiserPlugin(private val activity: Activity) {
     private var pendingPermission: MethodChannel.Result? = null
     private var advertising = false
 
+    /** 当前广播会话的 callback（停止时必须传回同一个）。 */
+    private var runningCallback: AdvertiseCallback? = null
+
     fun attach(messenger: BinaryMessenger) {
         MethodChannel(messenger, CHANNEL).setMethodCallHandler { call, result -> onMethodCall(call, result) }
     }
@@ -128,28 +131,27 @@ class AdvertiserPlugin(private val activity: Activity) {
             settingsBuilder.setConnectable(false)
         }
 
-        advertiser.startAdvertising(
-            dataBuilder.build(),
-            settingsBuilder.build(),
-            object : AdvertiseCallback() {
-                override fun onStartSuccess(settingsInEffect: AdvertiseSettings?) {
-                    advertising = true
-                    activity.runOnUiThread { result.success(true) }
-                }
-
-                override fun onStartFailure(errorCode: Int) {
-                    advertising = false
-                    activity.runOnUiThread { result.success(false) }
-                }
+        // 注意参数顺序：startAdvertising(settings, data, callback)。
+        val callback = object : AdvertiseCallback() {
+            override fun onStartSuccess(settingsInEffect: AdvertiseSettings?) {
+                advertising = true
+                activity.runOnUiThread { result.success(true) }
             }
-        )
+
+            override fun onStartFailure(errorCode: Int) {
+                advertising = false
+                activity.runOnUiThread { result.success(false) }
+            }
+        }
+        runningCallback = callback
+        advertiser.startAdvertising(settingsBuilder.build(), dataBuilder.build(), callback)
     }
 
+    /** 停止时必须传回同一个 callback —— Android 用它定位那一次广播会话。 */
     private fun stopAdvertising() {
-        if (!advertising) {
-            return
-        }
+        val callback = runningCallback ?: return
+        runningCallback = null
         advertising = false
-        adapter()?.bluetoothLeAdvertiser?.stopAdvertising(AdvertiseCallback())
+        adapter()?.bluetoothLeAdvertiser?.stopAdvertising(callback)
     }
 }
